@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html>
+<head lang="es">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+
+<script>
+    var cp = document.createElement('canvas'); // cp = canvas principal.
+    cp.width = 800;
+    cp.height=500;
+    cp.style.border = 'solid';
+    cp.style.position= 'absolute';
+    contx = cp.getContext('2d');
+
+    var juego=document.createElement('div');
+    var jugar=document.createElement('img');
+    var gameover=document.createElement('img');
+    gameover.style.position='absolute';
+    gameover.src='img/game over.png';
+    gameover.style.width='800px';
+    gameover.style.height='500px';
+    jugar.style.position='absolute';
+    jugar.style.width='500px';
+    jugar.style.height='500px';
+    jugar.style.top='35px';
+    jugar.style.left='180px';
+    jugar.src='img/play.png';
+    var derecha = true;
+
+    var jugador={
+        puntuacion:0,
+        audio:true,
+        juega:false
+    };
+
+    function verPuntuacion(){
+        contx.font= 'bold 24px arial,sans-serif';
+        contx.fillText('Puntuacion: '+jugador.puntuacion,50,480);
+        contx.fillText('Vidas:',505,480);
+        switch(nave.vida){
+            case 0 :    gameOver();
+                break;
+            case 1 :
+                break;
+            case 2 :    contx.drawImage(naveimg,670,450,50,50);
+                break;
+            case 3 :    contx.drawImage(naveimg,600,450,50,50);
+                contx.drawImage(naveimg,670,450,50,50);
+                break;
+        }
+    }
+
+    function gameOver(){
+        var gameovers =  document.createElement('audio');
+        gameovers.src = 'sonidos/gameovermario.mp3';
+        juego.appendChild(gameover);
+        jugador.juega=false;
+        gameovers.play();
+    }
+
+
+
+
+    //imagenes
+    var naveimg = new Image();
+    naveimg.src="img/nave.png";
+    var malo1img = new Image();
+    malo1img.src="img/malo1.png";
+    var malo2img = new Image();
+    malo2img.src="img/malo2.png";
+
+    // Barreras
+    var barreras = [];
+
+    var x = 60;
+    for (var i = 0; i < 4; i++) {
+        barreras[i] = {
+            posx: x,
+            posy: 300,
+            width: 80,
+            height: 40
+        };
+        x += 200;
+
+    }
+
+    function verBarreras(){
+        contx.fillStyle='green';
+        for(var i=0;i<4;i++){
+            if(barreras[i].height>0) {
+                contx.fillRect(barreras[i].posx, barreras[i].posy, barreras[i].width, barreras[i].height);
+            }
+        }
+    }
+
+    //balas de los malos
+    var balasm = [];
+
+
+    function verBalasM(){
+        for(var i=0;i<balasm.length;i++){
+            contx.fillRect(balasm[i].posx,balasm[i].posy,balasm[i].width,balasm[i].heigth);
+        }
+    }
+
+    function setBalasM(){
+        //Numero aleatorio para los disparos
+        var ale = Math.floor(Math.random() * (4 - 0 + 1)) + 0;
+        for (var i = 0; i < malos.length; i++) {
+            if(malos[i][ale]!= undefined){
+                balasm.push({
+                    posx: malos[i][ale].posx + 30,
+                    posy: malos[i][ale].posy + malos[i][ale].height,
+                    width: 4,
+                    heigth: 10
+                });
+            }
+
+        }
+    }
+
+    function moverBalasM(){
+        for(var i=0;i<balasm.length;i++){
+                balasm[i].posy+=5;
+        }
+    }
+
+
+
+    //balas
+    var balas=[];
+
+    function getBala() {
+        return {
+            posx: nave.posx + 28,
+            posy: nave.posy,
+            width: 4,
+            heigth: 10,
+            sigue:true
+        }
+    }
+
+    function moverBalas(){
+        for(var i=0;i<balas.length;i++){
+            if(balas[i].sigue){
+                balas[i].posy-=30;
+            }
+        }
+    }
+
+    function verBalas(){
+        contx.fillStyle='blue';
+        for(var i=0;i<balas.length;i++){
+            if(balas[i].sigue){
+                contx.fillRect(balas[i].posx,balas[i].posy,balas[i].width,balas[i].heigth);
+            }
+
+        }
+    }
+
+    //nave
+    var nave = {
+        posx : 400,
+        posy: 400,
+        width:50,
+        height:50,
+        vida:3
+    };
+
+    function verNave(){
+        if(nave.vida > 0) {
+            /*contx.save();
+            contx.fillStyle = 'red';
+            contx.fillRect(nave.posx, nave.posy, nave.width, nave.height);
+            contx.restore();*/
+            contx.drawImage(naveimg,nave.posx,nave.posy,nave.width, nave.height);
+        }
+    }
+
+    //fondo
+
+    function verFondo(){
+        //contx.fillStyle='black';
+        //contx.fillRect(0,0,cp.width,cp.height);
+        var fi = new Image();
+        fi.src='img/fondoimg.jpg';
+        contx.drawImage(fi,0,0);
+    }
+
+    //Malos
+
+    var malos=[];
+
+    function getMalo(){
+        var m = [];
+        var x = 10;
+        for(var i = 0;i<4;i++){
+            var ale = Math.floor(Math.random() * (1 - 0 + 1)) + 0;
+            var src= "";
+            switch (ale){
+                case 0: src="img/malo1.png";
+                    break;
+                case 1: src="img/malo2.png";
+                    break;
+            }
+            m[i]={
+                posx:x,
+                posy:20,
+                width:60,
+                height:60,
+                src:src,
+                vivo:true
+            };
+            x+=200;
+        }
+        return m;
+    }
+
+    function verMalos(){
+
+    contx.fillStyle='red';
+
+        for(var i=0;i<malos.length;i++){
+
+            for(var j=0;j<malos[i].length;j++){
+                if(malos[i][j].vivo){
+                    //contx.fillRect(malos[i][j].posx,malos[i][j].posy,malos[i][j].width,malos[i][j].height);
+                    var img = new Image();
+                    img.src=malos[i][j].src;
+                    contx.drawImage(img,malos[i][j].posx,malos[i][j].posy,malos[i][j].width,malos[i][j].height);
+                }
+            }
+        }
+    }
+
+    function moverMalosV(){
+        for(var i=0;i<malos.length;i++){
+            for(var j=0;j<malos[i].length;j++){
+                    malos[i][j].posy+= 20;
+            }
+        }
+    }
+
+    function moverMalosH(){
+        for(var i=0;i<malos.length;i++){
+
+            for(var j=0;j<malos[i].length;j++){
+                if(derecha){
+                    malos[i][j].posx+= 7;
+                }
+                else{
+                    malos[i][j].posx-= 7;
+                }
+            }
+        }
+    }
+
+    function setMalos(){
+        if(jugador.juega) {
+            malos.push(getMalo());
+        }
+    }
+
+    //teclas
+    window.onkeydown=function(e){
+        var sonidoDisparo =  document.createElement('audio');
+        sonidoDisparo.src = 'sonidos/shoot.wav';
+        if(e.keyCode == 39){
+            if(nave.posx< cp.width-50) {
+                nave.posx += 20;
+            }
+        }
+
+        if(e.keyCode == 37){
+            if(nave.posx > 10) {
+                nave.posx-= 20;
+            }
+        }
+        if(e.keyCode == 32){
+            balas.push(getBala());
+            sonidoDisparo.play();
+        }
+       
+
+    };
+
+    function arbitro(){
+        var sonidoAlien = document.createElement('audio');
+        var sonidoExplo = document.createElement('audio');
+        sonidoAlien.src='sonidos/invaderkilled.wav';
+        sonidoExplo.src='sonidos/explosion.wav';
+        for(var i=0;i<balas.length;i++) {
+            if (balas[i].posy < 30) {
+                balas.splice(i, 1);
+            }
+            else {
+                for (var j = 0; j < malos.length; j++) {
+                    for (var k = 0; k < malos[j].length; k++) {
+                        //if(malos[j][k].posy != undefined || balas[i].posy != undefined){
+                        if( balas[i] != undefined){
+                            if (balas[i].posy <= malos[j][k].posy + malos[j][k].height && (balas[i].posx >= malos[j][k].posx && balas[i].posx <= malos[j][k].posx + malos[j][k].width)) {
+                                balas.splice(i, 1);
+                                malos[j].splice(k, 1);
+                                sonidoAlien.play();
+                                jugador.puntuacion+=50;
+                            }
+                        }
+                    }
+                }
+                for(var j = 0;j<barreras.length;j++){
+                    if(barreras[j].height>0) {
+                        if( balas[i] != undefined) {
+                            if (balas[i].posy <= barreras[j].posy + barreras[j].height && (balas[i].posx >= barreras[j].posx && balas[i].posx <= barreras[j].posx + barreras[j].width)) {
+                                balas.splice(i, 1);
+                                barreras[j].height -= 4;
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        for(var i =0;i<balasm.length;i++){
+            if (balasm[i].posy > 490) {
+                balasm.splice(i, 1);
+            }
+            else{
+                for(var j = 0;j<barreras.length;j++){
+                    if(barreras[j].height>0) {
+                        if(balasm[i]!= undefined) {
+                            if (balasm[i].posy >= barreras[j].posy && (balasm[i].posx >= barreras[j].posx && balasm[i].posx <= barreras[j].posx + barreras[j].width)) {
+                                balasm.splice(i, 1);
+                                barreras[j].height -= 4;
+                                barreras[j].posy += 4;
+                            }
+                        }
+                    }
+                }
+                if(balasm[i]!= undefined) {
+                    if (balasm[i].posy >= nave.posy && (balasm[i].posx >= nave.posx && balasm[i].posx <= nave.posx + nave.width)) {
+                        balasm.splice(i, 1);
+                        nave.vida -= 1;
+                        sonidoExplo.play();
+                    }
+                }
+            }
+        }
+    }
+
+
+    function direccion(){
+        if(derecha){
+            derecha=false;
+        }
+        else{
+            derecha=true;
+        }
+    }
+
+
+    function constante(){
+        verFondo();
+        if(jugador.juega) {
+            arbitro();
+            moverBalas();
+            moverBalasM();
+            moverMalosH();
+            verNave();
+            verMalos();
+            verBalasM();
+            verBarreras();
+            verBalas();
+            verPuntuacion();
+        }
+    };
+
+    //setMalos();
+
+    frecuencia  = setInterval("constante()",100);
+    frecuenciabm = setInterval("setBalasM()",1000);
+
+    jugar.onclick = function(){
+        juego.removeChild(jugar);
+        jugador.juega=true;
+        setMalos();
+        frecuenciaM = setInterval("setMalos()",12000);
+        frecuencia2 = setInterval("moverMalosV()",2000);
+        frecuencia3 = setInterval("direccion()",2000);
+    };
+
+    juego.appendChild(cp);
+    juego.appendChild(jugar);
+    document.body.appendChild(juego);
+
+</script>
+
+</body>
+</html>
